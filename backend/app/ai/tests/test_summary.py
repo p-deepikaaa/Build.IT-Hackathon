@@ -1,14 +1,19 @@
 from app.ai.services.summarizer import generate_summary
 
-requests = [
-    "Need insulin urgently",
-    "Need drinking water",
-    "Need food for children",
-    "Need temporary shelter",
-    "Need medical assistance",
-    "Need electricity for oxygen machine"
-]
+requests = []
+
+print("Enter community requests one by one.")
+print("Type 'done' when finished.")
+
+while True:
+    request = input("Request: ")
+
+    if request.lower() == "done":
+        break
+
+    requests.append(request)
 
 result = generate_summary(requests)
 
+print("\nCommunity Summary:")
 print(result)
