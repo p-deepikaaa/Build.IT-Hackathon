@@ -1,4 +1,4 @@
-from app.services.ai_service import classify_request
+from app.ai.services.classifier import classify_request
 
 result = classify_request(
     "Need insulin urgently for my father."
