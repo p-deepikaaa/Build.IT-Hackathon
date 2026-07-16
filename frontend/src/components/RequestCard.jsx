@@ -4,6 +4,7 @@ import PriorityBadge, { StatusPill } from "./PriorityBadge";
 
 function RequestCard({ request }) {
   const isEmergency = request.priority === "emergency";
+  const isMatched = request.status?.toLowerCase() === "matched";
 
   const [matchResult, setMatchResult] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
@@ -123,20 +124,22 @@ function RequestCard({ request }) {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={findMatch}
-          disabled={loadingMatch}
-          className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Sparkles size={16} />
+        {!isMatched && (
+          <button
+            type="button"
+            onClick={findMatch}
+            disabled={loadingMatch}
+            className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Sparkles size={16} />
 
-          {loadingMatch
-            ? "Finding Match..."
-            : matchResult
-            ? "Refresh AI Match"
-            : "Find AI Match"}
-        </button>
+            {loadingMatch
+              ? "Finding Match..."
+              : matchResult
+              ? "Refresh AI Match"
+              : "Find AI Match"}
+          </button>
+        )}
       </div>
     </article>
   );

@@ -1,88 +1,115 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import RequestCard from "../components/RequestCard";
 
-const FILTERS = ["All", "Medical", "Food", "Shelter", "Electricity", "Transport"];
-
-const DUMMY_REQUESTS = [
-  {
-    id: 1,
-    name: "Aditi Sharma",
-    category: "Medical",
-    priority: "Critical",
-    description: "Need insulin urgently, pharmacy nearby is closed.",
-    location: "Baner Road, Pune",
-    time: "10 min ago",
-    phone: "+91 98765 43210",
-  },
-  {
-    id: 2,
-    name: "Rohan Verma",
-    category: "Food",
-    priority: "Medium",
-    description: "Family of 4 needs dry rations for two days.",
-    location: "Kothrud, Pune",
-    time: "25 min ago",
-    phone: "+91 98765 11223",
-  },
-  {
-    id: 3,
-    name: "Meera Iyer",
-    category: "Shelter",
-    priority: "High",
-    description: "Home flooded, need temporary shelter for the night.",
-    location: "Deccan Gymkhana, Pune",
-    time: "40 min ago",
-    phone: "+91 98765 99887",
-  },
-  {
-    id: 4,
-    name: "Kabir Singh",
-    category: "Electricity",
-    priority: "Low",
-    description: "Looking for a power bank to charge medical devices.",
-    location: "Aundh, Pune",
-    time: "1 hr ago",
-    phone: "+91 98765 66554",
-  },
-  {
-    id: 5,
-    name: "Priya Nair",
-    category: "Transport",
-    priority: "High",
-    description: "Need a ride to the hospital, no cabs available.",
-    location: "Hinjewadi, Pune",
-    time: "2 hr ago",
-    phone: "+91 98765 33221",
-  },
-  {
-    id: 6,
-    name: "Arjun Patel",
-    category: "Medical",
-    priority: "Medium",
-    description: "Need first-aid supplies for a minor injury.",
-    location: "Viman Nagar, Pune",
-    time: "3 hr ago",
-    phone: "+91 98765 44556",
-  },
+const FILTERS = [
+  "All",
+  "Medical",
+  "Food",
+  "Food & Water",
+  "Shelter",
+  "Electricity",
+  "Transport",
 ];
 
 export default function CommunityFeed() {
+  const [requests, setRequests] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/requests"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch community requests");
+        }
+
+        const data = await response.json();
+
+        console.log("Community Feed Requests:", data);
+
+        const formattedRequests = data.map((request) => {
+          const urgency = request.urgency?.toLowerCase();
+
+          return {
+            id: request.id,
+
+            title: `${request.category || "Community"} Request`,
+
+            description: request.description,
+
+            category: request.category || "Other",
+
+            status: request.status || "Pending",
+
+            priority:
+              urgency === "critical"
+                ? "emergency"
+                : urgency === "high"
+                ? "high"
+                : urgency === "low"
+                ? "low"
+                : "medium",
+
+            location: request.location,
+
+            time: "Recently",
+
+            author: request.name,
+
+            matchedResource: request.matched_resource,
+
+            matchReason: request.match_reason,
+          };
+        });
+
+        setRequests(formattedRequests);
+      } catch (err) {
+        console.error("Community Feed error:", err);
+
+        setError(
+          "Unable to load community requests. Make sure the backend is running."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
 
   const filteredRequests = useMemo(() => {
-    if (activeFilter === "All") return DUMMY_REQUESTS;
-    return DUMMY_REQUESTS.filter((r) => r.category === activeFilter);
-  }, [activeFilter]);
+    if (activeFilter === "All") {
+      return requests;
+    }
+
+    return requests.filter(
+      (request) =>
+        request.category?.toLowerCase() ===
+        activeFilter.toLowerCase()
+    );
+  }, [activeFilter, requests]);
 
   return (
     <div className="min-h-screen bg-white">
-      
       <section className="mx-auto max-w-6xl px-6 py-16">
+
+        {/* Heading */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Community Feed</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+            Community Feed
+          </h1>
+
           <p className="mt-3 text-slate-600">
-            Live requests from neighbors near you, updated in real time.
+            Live requests from neighbors near you.
           </p>
         </div>
 
@@ -103,40 +130,43 @@ export default function CommunityFeed() {
           ))}
         </div>
 
-        {/* Request grid */}
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredRequests.map((item) => {
-  const priorityMap = {
-    emergency: "emergency",
-    High: "high",
-    Medium: "medium",
-    Low: "low",
-  };
-
-  return (
-    <RequestCard
-      key={item.id}
-      request={{
-        title: item.category + " Request",
-        description: item.description,
-        category: item.category,
-        status: "open",
-        priority: priorityMap[item.priority],
-        location: item.location,
-        time: item.time,
-        author: item.name,
-        matches: Math.floor(Math.random() * 5) + 1,
-      }}
-    />
-  );
-})}
-        </div>
-
-        {filteredRequests.length === 0 && (
-          <div className="mt-16 text-center">
-            <p className="text-slate-500">No requests in this category right now.</p>
+        {/* Loading */}
+        {loading && (
+          <div className="mt-10 rounded-xl border border-blue-100 bg-blue-50 p-4 text-center text-blue-700">
+            Loading community requests...
           </div>
         )}
+
+        {/* Error */}
+        {error && (
+          <div className="mt-10 rounded-xl border border-red-100 bg-red-50 p-4 text-center text-red-700">
+            {error}
+          </div>
+        )}
+
+        {/* Request Grid */}
+        {!loading && !error && (
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredRequests.map((request) => (
+              <RequestCard
+                key={request.id}
+                request={request}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading &&
+          !error &&
+          filteredRequests.length === 0 && (
+            <div className="mt-16 text-center">
+              <p className="text-slate-500">
+                No requests in this category right now.
+              </p>
+            </div>
+          )}
+
       </section>
     </div>
   );
