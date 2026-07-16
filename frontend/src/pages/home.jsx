@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const FEATURES = [
@@ -58,25 +59,69 @@ const STEPS = [
   },
 ];
 
-const STATS = [
-  {
-    title: "Open Requests",
-    value: "12",
-    color: "text-blue-600",
-  },
-  {
-    title: "Resources",
-    value: "26",
-    color: "text-green-600",
-  },
-  {
-    title: "Successful Matches",
-    value: "18",
-    color: "text-gray-800",
-  },
-];
-
 function Home() {
+  const [stats, setStats] = useState({
+    openRequests: 0,
+    resources: 0,
+    successfulMatches: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [requestsResponse, resourcesResponse] = await Promise.all([
+          fetch("http://127.0.0.1:8000/requests"),
+          fetch("http://127.0.0.1:8000/resources"),
+        ]);
+
+        if (!requestsResponse.ok || !resourcesResponse.ok) {
+          throw new Error("Failed to fetch homepage statistics");
+        }
+
+        const requests = await requestsResponse.json();
+        const resources = await resourcesResponse.json();
+
+        const openRequests = requests.filter(
+          (request) =>
+            request.status?.toLowerCase() === "pending"
+        ).length;
+
+        const successfulMatches = requests.filter(
+          (request) =>
+            request.status?.toLowerCase() === "matched"
+        ).length;
+
+        setStats({
+          openRequests,
+          resources: resources.length,
+          successfulMatches,
+        });
+      } catch (error) {
+        console.error("Failed to load homepage statistics:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const STATS = [
+    {
+      title: "Open Requests",
+      value: stats.openRequests,
+      color: "text-blue-600",
+    },
+    {
+      title: "Resources",
+      value: stats.resources,
+      color: "text-green-600",
+    },
+    {
+      title: "Successful Matches",
+      value: stats.successfulMatches,
+      color: "text-gray-800",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -91,7 +136,7 @@ function Home() {
           </span>
 
           <h1 className="text-6xl font-bold mt-6 text-slate-900">
-            NeighborGrid 
+            NeighborGrid
           </h1>
 
           <p className="mt-6 text-xl text-gray-600">

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -16,6 +16,14 @@ class Request(Base):
     urgency = Column(String, nullable=False)
     status = Column(String, default="Pending")
 
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+
+    # Store AI matching result
+    matched_resource = Column(String, nullable=True)
+    match_reason = Column(String, nullable=True)
+
+
 class Resource(Base):
     __tablename__ = "resources"
 
@@ -27,3 +35,6 @@ class Resource(Base):
     description = Column(String, nullable=False)
     location = Column(String, nullable=False)
     availability = Column(String, nullable=False)
+
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
