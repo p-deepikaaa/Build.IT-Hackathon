@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
+import Navbar from "./components/navbar";
+import Home from "./pages/home";
 import Dashboard from "./pages/Dashboard";
 import CommunityFeed from "./pages/CommunityFeed";
 import NoticeBoard from "./pages/NoticeBoard";
