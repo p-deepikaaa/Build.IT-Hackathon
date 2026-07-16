@@ -1,13 +1,15 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class RequestCreate(BaseModel):
     name: str
     phone: str
-    category: str
     description: str
     location: str
-    urgency: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
 
 class ResourceCreate(BaseModel):
     name: str
@@ -17,6 +19,9 @@ class ResourceCreate(BaseModel):
     description: str
     location: str
     availability: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
 
 class StatusUpdate(BaseModel):
     status: str

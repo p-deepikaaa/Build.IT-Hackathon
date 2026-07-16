@@ -1,11 +1,12 @@
 import {
   MapContainer,
   TileLayer,
- Marker,
+  Marker,
   Popup,
-  Circle,
+  useMap,
 } from "react-leaflet";
 
+import { useEffect } from "react";
 import L from "leaflet";
 import { Link } from "react-router-dom";
 
@@ -18,24 +19,67 @@ function markerIcon(color) {
         background:${color};
         border-radius:50%;
         border:3px solid white;
+        box-shadow:0 2px 6px rgba(0,0,0,0.3);
       ">
       </div>
     `,
     className: "",
     iconSize: [20, 20],
+    iconAnchor: [10, 10],
   });
 }
 
-const hub = [12.9716, 77.5946];
+// Default center used only when there are no markers
+const defaultCenter = [12.9716, 77.5946];
 
-function MapCard({ points }) {
+function FitMapToPoints({ points }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!points || points.length === 0) {
+      return;
+    }
+
+    // If there is only one marker, center directly on it
+    if (points.length === 1) {
+      map.setView(
+        [points[0].lat, points[0].lng],
+        15
+      );
+
+      return;
+    }
+
+    // If there are multiple markers,
+    // automatically fit the map to show all of them
+    const bounds = L.latLngBounds(
+      points.map((point) => [
+        point.lat,
+        point.lng,
+      ])
+    );
+
+    map.fitBounds(bounds, {
+      padding: [50, 50],
+      maxZoom: 15,
+    });
+
+  }, [map, points]);
+
+  return null;
+}
+
+function MapCard({ points = [] }) {
   return (
-    <div className="rounded-2xl overflow-hidden shadow bg-white">
+    <div className="overflow-hidden rounded-2xl bg-white shadow">
 
       <MapContainer
-        center={hub}
+        center={defaultCenter}
         zoom={13}
-        style={{ height: "400px", width: "100%" }}
+        style={{
+          height: "400px",
+          width: "100%",
+        }}
       >
 
         <TileLayer
@@ -43,21 +87,17 @@ function MapCard({ points }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <Circle
-          center={hub}
-          radius={1000}
-          pathOptions={{
-            color: "#2563eb",
-            fillColor: "#3b82f6",
-            fillOpacity: 0.15,
-          }}
-        />
+        {/* Automatically move map to real markers */}
+        <FitMapToPoints points={points} />
 
         {points.map((point) => (
 
           <Marker
             key={point.id}
-            position={[point.lat, point.lng]}
+            position={[
+              point.lat,
+              point.lng,
+            ]}
             icon={markerIcon(
               point.kind === "need"
                 ? "#ef4444"
@@ -72,7 +112,9 @@ function MapCard({ points }) {
               </h3>
 
               <p className="text-sm">
-                {point.kind}
+                {point.kind === "need"
+                  ? "Help Request"
+                  : "Available Resource"}
               </p>
 
               <Link
