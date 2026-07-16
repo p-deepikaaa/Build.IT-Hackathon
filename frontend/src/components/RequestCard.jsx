@@ -16,7 +16,7 @@ function RequestCard({ request }) {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/match/${request.id}`
+        `https://neighborgrid-backend.onrender.com/match/${request.id}`
       );
 
       if (!response.ok) {

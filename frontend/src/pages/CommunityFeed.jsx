@@ -25,7 +25,7 @@ export default function CommunityFeed() {
         setError("");
 
         const response = await fetch(
-          "http://127.0.0.1:8000/requests"
+          "https://neighborgrid-backend.onrender.com/requests"
         );
 
         if (!response.ok) {

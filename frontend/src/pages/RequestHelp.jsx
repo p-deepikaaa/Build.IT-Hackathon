@@ -88,7 +88,7 @@ export default function RequestHelp() {
 
       // Step 1: Create request
       const response = await fetch(
-        "http://127.0.0.1:8000/requests",
+        "https://neighborgrid-backend.onrender.com/requests",
         {
           method: "POST",
           headers: {
@@ -115,7 +115,7 @@ export default function RequestHelp() {
 
       // Step 2: Try to match with an available resource
       const matchResponse = await fetch(
-        `http://127.0.0.1:8000/match/${data.id}`
+        `https://neighborgrid-backend.onrender.com/match/${data.id}`
       );
 
       if (matchResponse.ok) {

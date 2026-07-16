@@ -25,8 +25,8 @@ function Dashboard() {
 
         // Fetch requests and resources from FastAPI
         const [requestsResponse, resourcesResponse] = await Promise.all([
-          fetch("http://127.0.0.1:8000/requests"),
-          fetch("http://127.0.0.1:8000/resources"),
+          fetch("https://neighborgrid-backend.onrender.com/requests"),
+          fetch("https://neighborgrid-backend.onrender.com/resources"),
         ]);
 
         if (!requestsResponse.ok || !resourcesResponse.ok) {
